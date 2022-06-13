@@ -2,6 +2,7 @@
 
 namespace SuStartX\JWTRedisMultiAuth\Middleware;
 
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 abstract class BaseMiddleware
@@ -24,6 +25,10 @@ abstract class BaseMiddleware
     protected function setAuthedUser($request)
     {
         $request->authedUser = JWTAuth::parseToken()->toUser();
+
+        if($request->authedUser === false){
+            throw new TokenInvalidException('The token could not be parsed from the request');
+        }
     }
 
     protected function getErrorResponse($exception, $status = 200)
