@@ -9,6 +9,7 @@ trait ErrorHandlerTrait
     public function renderForJson($request, Throwable $throwable)
     {
         $json = parent::render($request, $throwable);
+
         if($json instanceof \Symfony\Component\HttpFoundation\JsonResponse){
             $data = $json->getData(true);
             $data['status'] = $json->getStatusCode();
@@ -67,19 +68,33 @@ trait ErrorHandlerTrait
 //            $response['code'] = $exception->getCode();
 //        }
 
-        if (config('app.debug')) {
-            $response = [
-                'message' => $throwable->getMessage(),
-                'exception' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
-                'trace' => collect($throwable->getTrace())->map(function ($trace) {
-                    return \Arr::except($trace, ['args']);
-                })->all(),
-            ];
+        if (!config('app.debug')) {
+            $response = array_merge(
+                [
+                    'message' => $throwable->getMessage(),
+                    'exception' => get_class($throwable),
+                    'file' => $throwable->getFile(),
+                    'line' => $throwable->getLine(),
+                    'trace' => collect($throwable->getTrace())->map(function ($trace) {
+                        return \Arr::except($trace, ['args']);
+                    })->all(),
+                ],
+                $response
+            );
         }else{
             if(!$this->isHttpException($throwable)){
-                $response['message'] = 'Server Error';
+                try {
+                    if ($throwable instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                        $message = 'Model not found.';
+                    }else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                        $message = '404 not found.';
+                    }else{
+                        $message = $throwable->getMessage();
+                    }
+                }catch (\Exception $e){
+                    $message = $e->getMessage() ?: 'Server Error';
+                }
+                $response['message'] = $message;
             }
         }
 
