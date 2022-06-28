@@ -1,28 +1,51 @@
 <?php
 
-namespace SuStartX\JWTRedisMultiAuth\Middleware;
+namespace SuStartX\JWTRedisMultiAuth\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use SuStartX\JWTRedisMultiAuth\Response\JWTRedisMultiAuthSuccessResponse;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 use PHPOpenSourceSaver\JWTAuth\JWTAuth;
 use PHPOpenSourceSaver\JWTAuth\Manager;
 use PHPOpenSourceSaver\JWTAuth\Token;
-use Symfony\Component\HttpFoundation\Response;
 
 class Refreshable extends BaseMiddleware
 {
+    /**
+     * The JWT Authenticator.
+     *
+     * @var JWTAuth
+     */
     protected $auth;
 
+    /**
+     * @var Manager
+     */
     protected $manager;
 
+    /**
+     * @param JWTAuth $auth
+     *
+     * @return void
+     */
     public function __construct(JWTAuth $auth, Manager $manager)
     {
         $this->auth = $auth;
         $this->manager = $manager;
     }
 
+    /**
+     * Handle an incoming request.
+     *
+     * @param $request
+     * @param Closure $next
+     *
+     * @return JsonResponse|Response
+     */
     public function handle($request, Closure $next)
     {
         $this->checkForToken($request, $next);
@@ -38,19 +61,34 @@ class Refreshable extends BaseMiddleware
         return $this->setAuthenticationResponse($token);
     }
 
-    protected function checkForToken(Request $request, Closure $next)
+    /**
+     * Check the request for the presence of a token.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    protected function checkForToken(Request $request)
     {
         if (!$this->auth->parser()->setRequest($request)->hasToken()) {
             return $this->getErrorResponse('TokenNotProvided', Response::HTTP_UNAUTHORIZED);
         }
-
-        return $next($request);
     }
 
+    /**
+     * Set the token response.
+     *
+     * @return Response|JsonResponse
+     */
     protected function setAuthenticationResponse($token = null)
     {
         $token = $token ?: $this->auth->refresh();
 
-        return response()->json(['token' => $token]);
+        return response()->json(new JWTRedisMultiAuthSuccessResponse(
+            200,
+            [
+                'token' => $token
+            ]
+        ), 200);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace SuStartX\JWTRedisMultiAuth\Middleware;
+namespace SuStartX\JWTRedisMultiAuth\Http\Middleware;
 
 use Closure;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
@@ -10,6 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PermissionMiddleware extends BaseMiddleware
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param $request
+     * @param Closure $next
+     * @param $permission
+     *
+     * @return \Illuminate\Http\JsonResponse|mixed
+     */
     public function handle($request, Closure $next, $permission)
     {
         try {
@@ -21,6 +30,13 @@ class PermissionMiddleware extends BaseMiddleware
         $this->setAuthedUser($request);
 
         $permissions = is_array($permission) ? $permission : explode('|', $permission);
+
+        if (config('jwt_redis_multi_auth.check_banned_user')) {
+            if (!$request->authedUser->checkUserStatus()) {
+                // TODO : Buraya yetkisiz başka kod girilebilir
+                return $this->getErrorResponse('AccountBlockedException', Response::HTTP_UNAUTHORIZED);
+            }
+        }
 
         foreach ($permissions as $permission) {
             if ($request->authedUser->can($permission)) {

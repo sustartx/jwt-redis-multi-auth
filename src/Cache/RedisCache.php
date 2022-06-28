@@ -8,9 +8,7 @@ use SuStartX\JWTRedisMultiAuth\Contracts\RedisCacheContract;
 class RedisCache implements RedisCacheContract
 {
     protected $data;
-
     private $time;
-
     protected $key;
 
     public function key(string $key): RedisCacheContract
@@ -45,6 +43,10 @@ class RedisCache implements RedisCacheContract
 
     public function refreshCache()
     {
+        if (!$this->getCache()) {
+            return false;
+        }
+
         $this->key($this->key)->removeCache();
 
         return $this->key($this->key)->data($this->data)->cache();
@@ -61,14 +63,14 @@ class RedisCache implements RedisCacheContract
 
     private function setTime(): RedisCacheContract
     {
-        $this->time = (config('jwtredismultiauth.redis_ttl_jwt') ? config('jwt.ttl') : config('jwtredismultiauth.redis_ttl')) * 60;
+        $this->time = (config('jwt_redis_multi_auth.redis_ttl_jwt') ? config('jwt.ttl') : config('jwt_redis_multi_auth.redis_ttl')) * 60;
 
         return $this;
     }
 
     protected function serialize($value)
     {
-        if (config('jwtredismultiauth.igbinary_serialization')) {
+        if (config('jwt_redis_multi_auth.igbinary_serialization')) {
             return igbinary_serialize($value);
         }
 
@@ -77,7 +79,7 @@ class RedisCache implements RedisCacheContract
 
     protected function unserialize($value)
     {
-        if (config('jwtredismultiauth.igbinary_serialization')) {
+        if (config('jwt_redis_multi_auth.igbinary_serialization')) {
             return igbinary_unserialize($value);
         }
 

@@ -17,9 +17,8 @@ class ProcessObserver implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    private $model;
-
-    private $process;
+    private Model $model;
+    private string $process;
 
     public function __construct(Model $model, string $process)
     {
@@ -43,7 +42,7 @@ class ProcessObserver implements ShouldQueue
     public function updated()
     {
         return RedisCache::key($this->model->getRedisKey())
-            ->data($this->model->load(config('jwtredismultiauth.cache_relations')))
+            ->data($this->model->load(config('jwt_redis_multi_auth.cache_relations')))
             ->refreshCache();
     }
 }

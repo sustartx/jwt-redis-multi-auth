@@ -1,14 +1,47 @@
 <?php
 
 return [
-    // default (= 'bcrypt'), 'jwtredismultiauth', 'new hashker class path'
+    // default (= 'bcrypt'), 'jwt_redis_multi_auth', 'new hasher class path'
     'hasher' => 'default',
 
-    "register_middlewares" => true,
+    // Kullanıcı giriş yaptığında bu bilgileri de 'with' ile veritabanından alır.
+    /*
+    |--------------------------------------------------------------------------
+    | Cache This Relations When User Has Authenticated
+    |--------------------------------------------------------------------------
+    |
+    | You can add this array to your own relations, anything you want to store
+    | in Redis. We recommend caching only roles and permissions here as much as
+    | possible.
+    |
+    */
+    'cache_relations' => [
+        'roles.permissions',
+        'permissions',
+    ],
+
+    // Bu değer autoDetectGuard() içinde otomatik guard tespiti için kullanılıyor.
+    'guard_prefix' => 'jwt_',
+
+    // Farklı guard ile giriş yapmak istiyorsa gelebilecek input key ne olabilir?
+    'login_type_guard_input_names' => [
+        'login_type',
+        'guard',
+        'type',
+    ],
+
+    // Giriş işleminde önceden token varsa geçici olarak iptal etmek için login url bilinmeli.
+    'login_route_name' => 'auth.login',
+
+    // JWT içinde guard bilgisinin hangi key ile saklanacağını belirler.
+    'jwt_guard_key' => 'guard',
+
+    // Modelden gelen verinin biçimlendirmesinin iptal edilip edilmeme durumu
+    'disable_default_user_data_factory' => true,
 
     /*
     |--------------------------------------------------------------------------
-    | JWTRedis User Model Observer
+    | JWTRedisMultiAuth User Model Observer
     |--------------------------------------------------------------------------
     |
     | This observer class, listening all events on your user model. Is triggered
@@ -17,19 +50,6 @@ return [
     |
     */
     'observer' => \SuStartX\JWTRedisMultiAuth\Observers\AuthAuthenticatableModelRedisObserver::class,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Observer Events Are Queued
-    |--------------------------------------------------------------------------
-    |
-    | If this option is true, model's events are processed as a job on queue.
-    | The job will be executed after the database transactions are commit.
-    |
-    | * ~ Don't forget to run Queue Worker if this option is true. ~ *
-    |
-    */
-    'observer_events_queue' => env('JWTREDIS_OBSERVER_EVENTS_QUEUE', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -49,17 +69,7 @@ return [
     |  User stored in Redis redis_ttl value time.
     |
     */
-    'redis_ttl' => env('JWTREDIS_REDIS_TTL', 60),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cache Prefix
-    |--------------------------------------------------------------------------
-    |
-    | If it's user id is 1, this user stored in Redis as auth_1.
-    |
-    */
-    'redis_auth_prefix' => env('JWTREDIS_REDIS_AUTH_PREFIX', 'auth_'),
+    'redis_ttl' => env('JWT_REDIS_MULTI_AUTH_REDIS_TTL', 60),
 
     /*
     |--------------------------------------------------------------------------
@@ -72,22 +82,67 @@ return [
     | * ~ Don't forget to enable igbinary extension if this option is true. ~ *
     |
     */
-    'igbinary_serialization' => env('JWTREDIS_IGBINARY_SERIALIZATION', false),
+    'igbinary_serialization' => env('JWT_REDIS_MULTI_AUTH_IGBINARY_SERIALIZATION', false),
 
     /*
     |--------------------------------------------------------------------------
-    | Cache This Relations When User Has Authenticated
+    | Status Column For Banned User Checking
     |--------------------------------------------------------------------------
     |
-    | You can add this array to your own relations, anything you want to store
-    | in Redis. We recommend caching only roles and permissions here as much as
-    | possible.
+    | You can set your specific column name of your user model.
     |
     */
-    'cache_relations' => [
-        'roles.permissions',
-        'permissions',
+    'status_column_title' => 'status',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Banned User Checking
+    |--------------------------------------------------------------------------
+    |
+    | If the check_banned_user option is true, that users cannot access
+    | the your application.
+    |
+    */
+    'check_banned_user' => env('JWT_REDIS_MULTI_AUTH_CHECK_BANNED_USER', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restricted statuses For Banned User Checking
+    |--------------------------------------------------------------------------
+    |
+    | If the user has one of these statuses and trying to reach your application,
+    | JWTRedisMultiAuth throws AccountBlockedException.
+    | You can set the message (check it errors array) that will return in this
+    | exception.
+    |
+    */
+    'banned_statuses' => [
+        'banned',
+        'deactivate',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Prefix
+    |--------------------------------------------------------------------------
+    |
+    | If it's user id is 1, this user stored in Redis as auth_1.
+    |
+    */
+    'jwt_redis_multi_auth_prefix' => env('JWT_REDIS_MULTI_AUTH_PREFIX', 'auth_'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Observer Events Are Queued
+    |--------------------------------------------------------------------------
+    |
+    | If this option is true, model's events are processed as a job on queue.
+    | The job will be executed after the database transactions are commit.
+    |
+    | * ~ Don't forget to run Queue Worker if this option is true. ~ *
+    |
+    */
+    'observer_events_queue' => env('JWT_REDIS_MULTI_AUTH_OBSERVER_EVENTS_QUEUE', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -98,10 +153,23 @@ return [
     |
     */
     'errors' => [
+
         'default' => [
             'title'   => 'Operation Failed',
             'message' => 'An error occurred.',
             'code'    => 0,
+        ],
+
+        'AccountBlockedException' => [
+            'title'   => 'Operation Failed',
+            'message' => 'Your account has been blocked by the administrator.',
+            'code'    => 1,
+        ],
+
+        'TokenNotProvidedException' => [
+            'title'   => 'Operation Failed',
+            'message' => 'Token not provided.',
+            'code'    => 2,
         ],
 
         'JWTException' => [
@@ -146,4 +214,5 @@ return [
             'code'    => 9,
         ],
     ],
+
 ];

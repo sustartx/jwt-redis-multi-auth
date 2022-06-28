@@ -1,53 +1,31 @@
 ### Description
 
-Geliştirdiğim bir Laravel projesinde oturum ve yetkilendirme işlemlerini JWT ile yapmam gerekiyordu. Projelerimde genellikle tercih ettiğim `tymon/jwt-auth` paketinin eskimiş olmasından ve yine sıkça tercih ettiğim `spatie/laravel-permission` paketini de kullanmam gerektiğinden ortak paket arayışına girerek Samet Şahin Doğan'ın geliştirdiği `sametsahindogan/laravel-jwtredis` paketine ulaştım. Bu paketin de kendi içindeki ufak bağımlılık sorunlarından dolayı tamamen kendi ihtiyaçlarıma uygun değişiklikler yaparak paketi farklı şekilde baştan yazmaya çalıştım. JWT paketini `php-open-source-saver/jwt-auth` ile değiştirip sorunları giderdim. 
+Geliştirdiğim bir Laravel projesinde oturum ve yetkilendirme işlemlerini JWT ile yapmam gerekiyordu. Projelerimde genellikle tercih ettiğim `tymon/jwt-auth` paketinin eskimiş olmasından ve yine sıkça tercih ettiğim `spatie/laravel-permission` paketini de kullanmam gerektiğinden ortak paket arayışına girerek [Samet Şahin Doğan](https://github.com/sametsahindogan)'ın geliştirdiği `sametsahindogan/laravel-jwtredis` paketine ulaştım. Bu paketin de kendi içindeki ufak bağımlılık sorunlarından dolayı tamamen kendi ihtiyaçlarıma uygun değişiklikler yaparak paketi farklı şekilde baştan yazmaya çalıştım. JWT paketini `php-open-source-saver/jwt-auth` ile değiştirip sorunları giderdim.
 
 `User` modeli haricinde `JWTRedisMultiAuthAuthenticatableBaseModel` sınıfından extend edilmiş tüm modeller ile oturum yönetimi yapılabilir.
 
 Geliştirdiği `laravel-jwtredis` paketi için Samet Şahin Doğan'a teşekkürler.
 
-**En kısa sürede paketin kullanımına dair detaylı bir içerik hazırlayıp örnek bir proje ekleyeceğim.** 
+**En kısa sürede paketin kullanımına dair detaylı bir içerik hazırlayıp örnek bir proje ekleyeceğim.**
 
-### Installation
-```bash
-composer require sustartx/jwt-redis-multi-auth predis/predis
-```
-`.env` içinde aşağıdaki değişiklikleri yapın.
-```dotenv
-CACHE_DRIVER=redis
-REDIS_CLIENT=predis
-```
-`guards` ve `providers` içeriğini `config/auth.php` dosyasından aşağıdaki gibi değiştirin.
-```php
-'guards' => [
-        'api' => [
-            'driver' => 'jwt_redis_guard',
-            'provider' => 'users'
-        ],
-    ],
-
-'providers' => [
-        'users' => [
-            'driver' => 'jwt_redis_user_provider',
-            'model' =>  App\Models\User::class,
-        ],
-    ],
-```
-Laravel `auto-discovery` ile paketi otomatik bulup kayıt edecektir. Eğer kendiniz kayıt etmek istiyorsanız `config/app.php` içindeki `providers` dizisine aşağıdaki satır ekleyin.
-```php
-SuStartX\JWTRedisMultiAuth\JWTRedisServiceProvider::class,
-```
-
-#### Publish
-```bash
-php artisan vendor:publish --provider="SuStartX\JWTRedisMultiAuth\JWTRedisMultiAuthServiceProvider" --tag="config"
-```
-
-### TODO 
-- Redis ayarlardan aktif veya pasif yapılabilmeli.
-- Kullanıcı giriş yapınca ayar durumuna göre bilgisi rediste saklanmalı.
-- Kullanıcıların hangi bilgilerinin rediste saklanacağı geliştiriciye bırakılmalı.
-
+### TODO
+- [x] Farklı modeller ile giriş yapılabilmeli
+- [x] İstenilen modele özel JWT üretilebilmeli
+- [x] Gelen request ile hangi Guard, Provider ve Model ile işleneceği tespit edilebilmeli
+- [x] Giriş sırasında yetkiler alınabilmeli
+- [x] Redis'e bilgiler kaydedilebilmeli
+- [x] Observer ile modeldeki herhangi bir değişiklikte Redis verisi güncellenmeli
+- [x] Middleware işlemleri tamamlanmalı
+- [x] Login sırasında ilgili model otomatik tespit edilerek redis key kısmında $model_adi + $model_id şeklinde key belirlenmeli
+- [x] Kullanıcı güncellendiğinde Redis verisi güncellenmeli
+- [x] Refreshable çalışmalı
+- [x] Yetkiler (relation işlemleri) güncellendiğinde Redis verisi güncellenmeli
+- [x] Response yapısı güncellenmeli
+- [x] Hem Cookie hem Authorization header bilgisi ile token kontrol edilebilmeli
+- [x] Kullanıcıların hangi bilgilerinin rediste saklanacağı geliştiriciye bırakılmalı.
+- [ ] Redis ayarlardan aktif veya pasif yapılabilmeli.
+- [ ] Geçerli bir JWT ile request geldiyse ve kullanıcı Redis içinde yoksa JWT ile yeniden cache oluşturulmalı, cache öncesinde veritananında kullanıcının olup olmadığı 1 kere kontrol edilmeli
+- [ ] Ban durumu ile ilgili altyapı güncellenmeli, banned_statuses işlemleri kontrol edilmeli
 
 ## License
 MIT © [Şakir Mehmetoğlu](https://github.com/sustartx/jwt-redis-multi-auth/blob/master/LICENSE)

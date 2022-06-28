@@ -1,6 +1,6 @@
 <?php
 
-namespace SuStartX\JWTRedisMultiAuth\Middleware;
+namespace SuStartX\JWTRedisMultiAuth\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\JsonResponse;
