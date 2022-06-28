@@ -3,6 +3,7 @@
 namespace SuStartX\JWTRedisMultiAuth\Guards;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use SuStartX\JWTRedisMultiAuth\Facades\RedisCache;
 class JWTRedisMultiAuthGuard extends JWTGuard
 {
     private $config = [];
+
+    protected $lastAttempted = null;
 
     public function __construct(JWT $jwt, UserProvider $provider, Request $request, Dispatcher $eventDispatcher, $config)
     {
@@ -27,6 +30,16 @@ class JWTRedisMultiAuthGuard extends JWTGuard
             return $this->config;
         }
         return array_key_exists($key, $this->config) ? $this->config[$key] : null;
+    }
+
+    /**
+     * Get the last user we attempted to authenticate.
+     *
+     * @return Authenticatable
+     */
+    public function setLastAttempted(Authenticatable $authenticatable)
+    {
+        $this->lastAttempted = $authenticatable;
     }
 
     /**
