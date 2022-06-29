@@ -27,7 +27,7 @@ class GuardHelper
         // ----------------------------------------------------------------------------------------------------
 
         // Giriş yapmak istiyorsa..
-        if(config('jwt_redis_multi_auth.login_route_name') === $request->route()->getName()){
+        if($request->route() && config('jwt_redis_multi_auth.login_route_name') === $request->route()->getName()){
             if (!is_null($request_guard_name)){
                 $guard_name = $request_guard_name;
             }else{
