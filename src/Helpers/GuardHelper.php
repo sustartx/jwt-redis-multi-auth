@@ -40,7 +40,7 @@ class GuardHelper
 
             if ($token){
                 $decoded_token = app()->get('tymon.jwt.manager')->decode(new Token($token));
-                $guard = $decoded_token->get('guard');
+                $guard = $decoded_token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
                 // Oturum varsa oturumdan hangi guard ile çalıştığı tespit edildi
                 $guard_name = $prefix . $guard;
             }else{
