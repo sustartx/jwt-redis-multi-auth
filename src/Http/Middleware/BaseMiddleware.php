@@ -11,6 +11,7 @@ use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use SuStartX\JWTRedisMultiAuth\Response\JWTRedisMultiAuthErrorResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class BaseMiddleware
 {
@@ -33,7 +34,7 @@ class BaseMiddleware
 
             return $request;
         } catch (TokenExpiredException | TokenInvalidException | JWTException | TokenBlacklistedException $exception) {
-            return $this->getErrorResponse($exception);
+            return $this->getErrorResponse($exception, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

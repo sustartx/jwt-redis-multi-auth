@@ -4,6 +4,7 @@ namespace SuStartX\JWTRedisMultiAuth\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class Authenticate extends BaseMiddleware
 {
@@ -23,7 +24,7 @@ class Authenticate extends BaseMiddleware
             $this->setAuthedUser($request);
 
             if (!$request->authedUser->checkUserStatus()) {
-                return $this->getErrorResponse('AccountBlockedException');
+                return $this->getErrorResponse('AccountBlockedException', Response::HTTP_UNAUTHORIZED);
             }
         }
 

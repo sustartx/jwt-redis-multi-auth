@@ -34,7 +34,7 @@ class RoleMiddleware extends BaseMiddleware
 
         if (config('jwt_redis_multi_auth.check_banned_user')) {
             if (!$request->authedUser->checkUserStatus()) {
-                return $this->getErrorResponse('AccountBlockedException');
+                return $this->getErrorResponse('AccountBlockedException', Response::HTTP_UNAUTHORIZED);
             }
         }
 
