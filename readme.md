@@ -26,6 +26,7 @@ Geliştirdiği `laravel-jwtredis` paketi için Samet Şahin Doğan'a teşekkürl
 - [ ] Redis ayarlardan aktif veya pasif yapılabilmeli.
 - [ ] Geçerli bir JWT ile request geldiyse ve kullanıcı Redis içinde yoksa JWT ile yeniden cache oluşturulmalı, cache öncesinde veritananında kullanıcının olup olmadığı 1 kere kontrol edilmeli
 - [ ] Ban durumu ile ilgili altyapı güncellenmeli, banned_statuses işlemleri kontrol edilmeli
+- [ ] Config bilgilerinin publis edilmeden çalışabilmesi için merge edilmeli
 
 ## License
 MIT © [Şakir Mehmetoğlu](https://github.com/sustartx/jwt-redis-multi-auth/blob/master/LICENSE)

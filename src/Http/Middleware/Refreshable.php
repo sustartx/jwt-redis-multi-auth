@@ -48,40 +48,17 @@ class Refreshable extends BaseMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $this->checkForToken($request, $next);
-
-        try {
-            $token = $this->auth->parseToken()->refresh();
-
-            $request->claim = $this->manager->decode(new Token($token))->get('sub');
-        } catch (TokenInvalidException | JWTException $e) {
-            return $this->getErrorResponse($e, Response::HTTP_UNAUTHORIZED);
-        }
-
-        return $this->setAuthenticationResponse($token);
-    }
-
-    /**
-     * Check the request for the presence of a token.
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    protected function checkForToken(Request $request)
-    {
         if (!$this->auth->parser()->setRequest($request)->hasToken()) {
             return $this->getErrorResponse('TokenNotProvided', Response::HTTP_UNAUTHORIZED);
         }
-    }
 
-    /**
-     * Set the token response.
-     *
-     * @return Response|JsonResponse
-     */
-    protected function setAuthenticationResponse($token = null)
-    {
+        try {
+            $token = $this->auth->parseToken()->refresh();
+            $request->claim = $this->manager->decode(new Token($token))->get('sub');
+        } catch (TokenInvalidException | JWTException $exception) {
+            return $this->getErrorResponse($exception, Response::HTTP_UNAUTHORIZED);
+        }
+
         $token = $token ?: $this->auth->refresh();
 
         return response()->json(new JWTRedisMultiAuthSuccessResponse(

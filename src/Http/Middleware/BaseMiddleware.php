@@ -5,10 +5,6 @@ namespace SuStartX\JWTRedisMultiAuth\Http\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenBlacklistedException;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use SuStartX\JWTRedisMultiAuth\Response\JWTRedisMultiAuthErrorResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,17 +21,12 @@ class BaseMiddleware
      * @return mixed
      */
     public function setIfClaimIsNotExist(Request $request){
-        try {
-            if ($request->claim === null) {
-                $token = JWTAuth::getPayload(JWTAuth::getToken());
-                $request->claim = $token->get('sub');
-                $request->jwt_guard_key = $token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
-            }
-
-            return $request;
-        } catch (TokenExpiredException | TokenInvalidException | JWTException | TokenBlacklistedException $exception) {
-            return $this->getErrorResponse($exception, Response::HTTP_INTERNAL_SERVER_ERROR);
+        if ($request->claim === null) {
+            $token = JWTAuth::getPayload(JWTAuth::getToken());
+            $request->claim = $token->get('sub');
+            $request->jwt_guard_key = $token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
         }
+        return $request;
     }
 
     /**
