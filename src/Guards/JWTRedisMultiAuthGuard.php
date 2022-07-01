@@ -71,7 +71,6 @@ class JWTRedisMultiAuthGuard extends JWTGuard
             ]);
         }
 
-
         $result_type = 'SUCCESS';
         $status = false;
         $token = null;
@@ -107,13 +106,112 @@ class JWTRedisMultiAuthGuard extends JWTGuard
             }
 
             $status = true;
+        }else{
+            $this->fireFailedEvent($user, $credentials);
         }
-
-        $this->fireFailedEvent($user, $credentials);
 
         return [
             'status' => $status,
             'type' => $result_type,
+            'token' => $token,
+        ];
+    }
+
+    public function attempt_2fa_step_1(array $credentials = [])
+    {
+        $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
+
+        $result_type = 'SUCCESS';
+        $status = false;
+
+        // E-posta adresini doğrulamış mı?
+        if(!$this->lastAttempted->hasVerifiedEmail()){
+            $result_type = 'EMAIL_NOT_VERIFIED';
+        }
+
+        // Yasaklanmış mı?
+        if ($this->lastAttempted->is_banned){
+            $result_type = 'BANNED';
+        }
+
+        if ($this->hasValidCredentials($user, $credentials)) {
+            if (config('jwt_redis_multi_auth.check_banned_user')) {
+                if (!$user->checkUserStatus()) {
+                    throw new AuthorizationException('Your account has been blocked by the administrator.');
+                }
+            }
+
+            $status = true;
+        }else{
+            $this->fireFailedEvent($user, $credentials);
+        }
+
+        return [
+            'status' => $status,
+            'type' => $result_type,
+            'authenticable' => $this->lastAttempted
+        ];
+    }
+
+    public function attempt_2fa_step_2($code, $login = true, $data_factory = null)
+    {
+        $this->lastAttempted = $user = $this->provider->retrieveBy2FACode($code);
+
+        $prefix = config('jwt_redis_multi_auth.guard_prefix');
+
+        $this->lastAttempted->addCustomClaims([
+            config('jwt_redis_multi_auth.jwt_guard_key') => str_replace($prefix, '', $this->getConfig('provider')),
+        ]);
+
+        if ($data_factory === null && config('jwt_redis_multi_auth.disable_default_user_data_factory') === false){
+            $data_factory = auth()->guard()->getProvider()->getDataFactory();
+        }
+
+        if($data_factory){
+            $this->lastAttempted->addCustomClaims([
+                'user' => $data_factory->data($this->lastAttempted)
+            ]);
+        }
+
+        $result_type = 'SUCCESS';
+        $status = false;
+        $token = null;
+
+        // E-posta adresini doğrulamış mı?
+        if(!$this->lastAttempted->hasVerifiedEmail()){
+            $result_type = 'EMAIL_NOT_VERIFIED';
+        }
+
+        // Yasaklanmış mı?
+        if ($this->lastAttempted->is_banned){
+            $result_type = 'BANNED';
+        }
+
+        if($this->lastAttempted){
+            // TODO : Aktif edilmeli
+            // $this->fireAttemptEvent($credentials);
+
+            $this->refreshAuthFromRedis($user);
+
+            if ($login){
+                $token = $this->login($user);
+
+                $this->setUser($this->lastAttempted);
+                $this->storeRedis(true);
+            }else{
+                $token = true;
+            }
+
+            $status = true;
+        }else{
+            // TODO : Aktif edilmeli
+            // $this->fireFailedEvent($user, $credentials);
+        }
+
+        return [
+            'status' => $status,
+            'type' => $result_type,
+            'authenticable' => $this->lastAttempted,
             'token' => $token,
         ];
     }

@@ -45,6 +45,22 @@ class JWTRedisMultiAuthUserProvider extends EloquentUserProvider implements User
             return;
         }
 
+        return $this->getUserFromDb($credentials);
+    }
+
+    public function retrieveBy2FACode($code)
+    {
+        $credentials = [
+            'two_fa_code' => $code,
+            'two_fa_expiration' => function($q){
+                $q->where('two_fa_expiration', '>=', now());
+            }
+        ];
+
+        return $this->getUserFromDb($credentials);
+    }
+
+    private function getUserFromDb($credentials){
         $query = $this->newModelQuery()
             ->with(config('jwt_redis_multi_auth.cache_relations'))
         ;

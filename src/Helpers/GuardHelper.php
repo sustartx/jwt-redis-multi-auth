@@ -27,7 +27,13 @@ class GuardHelper
         // ----------------------------------------------------------------------------------------------------
 
         // Giriş yapmak istiyorsa..
-        if($request->route() && config('jwt_redis_multi_auth.login_route_name') === $request->route()->getName()){
+        if(
+            $request->route() &&
+            (
+                config('jwt_redis_multi_auth.login_route_name') === $request->route()->getName() ||
+                config('jwt_redis_multi_auth.login_2fa_code_route_name') === $request->route()->getName()
+            )
+        ){
             if (!is_null($request_guard_name)){
                 $guard_name = $request_guard_name;
             }else{
@@ -50,6 +56,12 @@ class GuardHelper
                     $guard_name = $default_guard_name;
                 }
             }
+        }
+
+        // Olmayan guard ismiyle istekte bulunulduğunda hata vermemesi için varsaılan guard ile işlem yapılıyor.
+        $all_guard = config('auth.guards');
+        if(!array_key_exists($guard_name, $all_guard)){
+            $guard_name = $default_guard_name;
         }
 
         return $guard_name;
