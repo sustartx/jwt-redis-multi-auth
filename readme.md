@@ -22,11 +22,13 @@ Geliştirdiği `laravel-jwtredis` paketi için Samet Şahin Doğan'a teşekkürl
 - [x] Yetkiler (relation işlemleri) güncellendiğinde Redis verisi güncellenmeli
 - [x] Response yapısı güncellenmeli
 - [x] Hem Cookie hem Authorization header bilgisi ile token kontrol edilebilmeli
-- [x] Kullanıcıların hangi bilgilerinin rediste saklanacağı geliştiriciye bırakılmalı.
-- [ ] Redis ayarlardan aktif veya pasif yapılabilmeli.
+- [x] Kullanıcıların hangi bilgilerinin rediste saklanacağı geliştiriciye bırakılmalı
+- [ ] Redis ayarlardan aktif veya pasif yapılabilmeli
 - [ ] Geçerli bir JWT ile request geldiyse ve kullanıcı Redis içinde yoksa JWT ile yeniden cache oluşturulmalı, cache öncesinde veritananında kullanıcının olup olmadığı 1 kere kontrol edilmeli
 - [ ] Ban durumu ile ilgili altyapı güncellenmeli, banned_statuses işlemleri kontrol edilmeli
-- [ ] Config bilgilerinin publis edilmeden çalışabilmesi için merge edilmeli
+- [ ] Config bilgilerinin publish edilmeden çalışabilmesi için merge edilmeli
+- [ ] 2FA durumları için event oluşturulmalı
+- [ ] Tüm event altyapısı değiştirilmeli
 
 ## License
 MIT © [Şakir Mehmetoğlu](https://github.com/sustartx/jwt-redis-multi-auth/blob/master/LICENSE)
