@@ -46,7 +46,7 @@ class JWTRedisMultiAuthGuard extends JWTGuard
         $token = null;
 
         if ($this->lastAttempted){
-            $this->prepareLastAttempedData($this->lastAttempted, $data_factory);
+            $this->lastAttempted = $this->prepareLastAttempedData($this->lastAttempted, $data_factory);
             $result_type = $this->checkLastAttemptedLoginStatus();
 
             if ($this->hasValidCredentials($this->lastAttempted, $credentials)) {
@@ -118,7 +118,7 @@ class JWTRedisMultiAuthGuard extends JWTGuard
         $token = null;
 
         if ($this->lastAttempted){
-            $this->prepareLastAttempedData($this->lastAttempted, $data_factory);
+            $this->lastAttempted = $this->prepareLastAttempedData($this->lastAttempted, $data_factory);
             $result_type = $this->checkLastAttemptedLoginStatus();
             $this->refreshAuthFromRedis($this->lastAttempted);
             $token = $this->login($this->lastAttempted);
@@ -227,12 +227,13 @@ class JWTRedisMultiAuthGuard extends JWTGuard
      * Verilen kullanıcı bilgisini token oluşturabilecek şekilde hazırlıyor.
      *
      * @param $authenticable
-     * @return void
+     * @param $data_factory
+     * @return mixed
      */
-    private function prepareLastAttempedData($authenticable, $data_factory = null){
+    public function prepareLastAttempedData($authenticable, $data_factory = null){
         $prefix = config('jwt_redis_multi_auth.guard_prefix');
 
-        $this->lastAttempted->addCustomClaims([
+        $authenticable->addCustomClaims([
             config('jwt_redis_multi_auth.jwt_guard_key') => str_replace($prefix, '', $this->getConfig('provider')),
         ]);
 
@@ -241,10 +242,12 @@ class JWTRedisMultiAuthGuard extends JWTGuard
         }
 
         if($data_factory){
-            $this->lastAttempted->addCustomClaims([
-                'user' => $data_factory->data($this->lastAttempted)
+            $authenticable->addCustomClaims([
+                'user' => $data_factory->data($authenticable)
             ]);
         }
+
+        return $authenticable;
     }
 
     private function checkLastAttemptedLoginStatus(){
