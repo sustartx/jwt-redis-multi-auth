@@ -20,18 +20,10 @@ class JWTRedisMultiAuthUserProvider extends EloquentUserProvider implements User
     }
 
     /**
-     * NOT : Bu kod "laravel/framework/src/Illuminate/Auth/EloquentUserProvider.php" içinden alındı ve sadece sorguya with() eklendi.
-     */
-    /**
-     * @OVERRIDE!
-     *
-     * Retrieve a user by the given credentials.
-     *
-     * !Important; I made some changes this method for eager loading user roles&permissions.
+     * Verilen şartlara göre veritabanında sorgulama yapar.
      *
      * @param array $credentials
-     *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Contracts\Auth\Authenticatable|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|void|null
      */
     public function retrieveByCredentials(array $credentials)
     {
@@ -48,6 +40,12 @@ class JWTRedisMultiAuthUserProvider extends EloquentUserProvider implements User
         return $this->getUserFromDb($credentials);
     }
 
+    /**
+     * 2FA kodu ile veritabanında sorgulama yapar.
+     *
+     * @param $code
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
     public function retrieveBy2FACode($code)
     {
         $credentials = [
@@ -60,6 +58,12 @@ class JWTRedisMultiAuthUserProvider extends EloquentUserProvider implements User
         return $this->getUserFromDb($credentials);
     }
 
+    /**
+     * Şartlara uygun sorgu yaparak bulduğu kaydı döndürür.
+     *
+     * @param $credentials
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
     private function getUserFromDb($credentials){
         $query = $this->newModelQuery()
             ->with(config('jwt_redis_multi_auth.cache_relations'))
@@ -78,6 +82,9 @@ class JWTRedisMultiAuthUserProvider extends EloquentUserProvider implements User
         return $query->first();
     }
 
+    /**
+     * @return DataFactoryContract
+     */
     public function getDataFactory(){
         return $this->data_factory;
     }
