@@ -45,10 +45,14 @@ class GuardHelper
             $token = $token_cookie ?: $token_bearer ?: null;
 
             if ($token){
-                $decoded_token = app()->get('tymon.jwt.manager')->decode(new Token($token));
-                $guard = $decoded_token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
-                // Oturum varsa oturumdan hangi guard ile çalıştığı tespit edildi
-                $guard_name = $prefix . $guard;
+                try {
+                    $decoded_token = app()->get('tymon.jwt.manager')->decode(new Token($token));
+                    $guard = $decoded_token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
+                    // Oturum varsa oturumdan hangi guard ile çalıştığı tespit edildi
+                    $guard_name = $prefix . $guard;
+                }catch (\Exception $exception){
+                    $guard_name = $default_guard_name;
+                }
             }else{
                 if (!is_null($request_guard_name)){
                     $guard_name = $request_guard_name;
