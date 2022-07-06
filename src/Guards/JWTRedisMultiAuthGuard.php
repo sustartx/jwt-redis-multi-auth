@@ -277,4 +277,8 @@ class JWTRedisMultiAuthGuard extends JWTGuard
         $this->lastAttempted = $authenticatable;
     }
     // ----------------------------------------------------------------------------------------------------
+
+    public function check(){
+        return (bool)$this->getAuthFromRedis();
+    }
 }
