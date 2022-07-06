@@ -32,6 +32,7 @@ return [
 
     // Giriş işleminde önceden token varsa geçici olarak iptal etmek için login url bilinmeli.
     'login_route_name' => 'auth.login',
+    'login_2fa_code_route_name' => 'auth.2fa_code',
 
     // JWT içinde guard bilgisinin hangi key ile saklanacağını belirler.
     'jwt_guard_key' => 'guard',
