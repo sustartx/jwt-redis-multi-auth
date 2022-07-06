@@ -35,7 +35,7 @@ return [
     'login_2fa_code_route_name' => 'auth.2fa_code',
 
     // JWT içinde guard bilgisinin hangi key ile saklanacağını belirler.
-    'jwt_guard_key' => 'guard',
+    'jwt_guard_key' => 'type',
 
     // Modelden gelen verinin biçimlendirmesinin iptal edilip edilmeme durumu
     'disable_default_user_data_factory' => true,
