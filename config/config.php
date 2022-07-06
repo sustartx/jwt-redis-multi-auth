@@ -216,4 +216,56 @@ return [
         ],
     ],
 
+    'exception_groups' => [
+        'JWTAuth' => [
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\InvalidClaimException::class => [
+                'title' => 'InvalidClaimException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException::class => [
+                'title' => 'JWTException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\PayloadException::class => [
+                'title' => 'PayloadException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\SecretMissingException::class => [
+                'title' => 'SecretMissingException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\TokenBlacklistedException::class => [
+                'title' => 'TokenBlacklistedException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException::class => [
+                'title' => 'TokenExpiredException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException::class => [
+                'title' => 'TokenInvalidException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+            \PHPOpenSourceSaver\JWTAuth\Exceptions\UserNotDefinedException::class => [
+                'title' => 'UserNotDefinedException',
+                'message' => '',
+                'status' => false,
+                'http_code' => 401,
+            ],
+        ]
+    ]
 ];
