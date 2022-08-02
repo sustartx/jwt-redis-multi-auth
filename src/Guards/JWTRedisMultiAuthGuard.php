@@ -281,4 +281,9 @@ class JWTRedisMultiAuthGuard extends JWTGuard
     public function check(){
         return (bool)$this->getAuthFromRedis();
     }
+
+    public function getToken(){
+        // TODO : Sadece cookie yerine veritabanından da kontrol edilmeli
+        return \Cookie::get(env('COOKIE_NAME'));
+    }
 }
