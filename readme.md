@@ -29,6 +29,7 @@ Geliştirdiği `laravel-jwtredis` paketi için Samet Şahin Doğan'a teşekkürl
 - [ ] Config bilgilerinin publish edilmeden çalışabilmesi için merge edilmeli
 - [ ] 2FA durumları için event oluşturulmalı
 - [ ] Tüm event altyapısı değiştirilmeli
+- [ ] Oturum açmadan kullanıcıya token üretilebilmeli
 
 ## License
 MIT © [Şakir Mehmetoğlu](https://github.com/sustartx/jwt-redis-multi-auth/blob/master/LICENSE)
