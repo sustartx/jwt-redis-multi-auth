@@ -10,7 +10,7 @@ trait ErrorHandlerTrait
         $exception_groups = config('jwt_redis_multi_auth.exception_groups');
         foreach ($exception_groups as $exception_group) {
             foreach ($exception_group as $exception => $value) {
-                if ($throwable instanceof $exception){
+                if (get_class($throwable) === $exception){
                     $data = [
                         'title' => $value['title'],
                         'message' => (strlen($value['message'])) ? $value['message']: $throwable->getMessage(),
