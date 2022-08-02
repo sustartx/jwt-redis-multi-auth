@@ -22,9 +22,12 @@ class BaseMiddleware
      */
     public function setIfClaimIsNotExist(Request $request){
         if ($request->claim === null) {
-            $token = JWTAuth::getPayload(JWTAuth::getToken());
-            $request->claim = $token->get('sub');
-            $request->jwt_guard_key = $token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
+            $token_cookie = \Cookie::get(env('COOKIE_NAME'));
+            $token_bearer = request()->bearerToken();
+            $token = $token_cookie ?: $token_bearer ?: null;
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $request->claim = $payload->get('sub');
+            $request->jwt_guard_key = $payload->get(config('jwt_redis_multi_auth.jwt_guard_key'));
         }
         return $request;
     }
