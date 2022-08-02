@@ -1,7 +1,6 @@
 <?php
 namespace SuStartX\JWTRedisMultiAuth\Helpers;
 
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use PHPOpenSourceSaver\JWTAuth\Token;
 
 class GuardHelper
