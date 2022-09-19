@@ -163,13 +163,12 @@ class JWTRedisMultiAuthGuard extends JWTGuard
 
         $this->fireAttemptEvent($credentials);
 
-        $result_type = 'SUCCESS';
+        $result_type = 'FAIL';
         $status = false;
 
         if ($this->lastAttempted) {
-            $result_type = $this->checkLastAttemptedLoginStatus();
-
             if ($this->hasValidCredentials($this->lastAttempted, $credentials)) {
+                $result_type = $this->checkLastAttemptedLoginStatus();
                 $status = true;
             } else {
                 $this->fireFailedEvent($this->lastAttempted, $credentials);
