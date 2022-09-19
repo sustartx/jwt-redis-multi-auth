@@ -25,6 +25,7 @@ class Authenticate extends BaseMiddleware
         try {
             $this->setIfClaimIsNotExist($request);
         } catch (TokenExpiredException | TokenInvalidException | JWTException | TokenBlacklistedException $exception) {
+            // TODO : Token null olarak gönderilince "A token is required" mesajıyla PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException hatası çıkıyor. Hata vermeden oturum yok diye cevap verilmeli
             return $this->getErrorResponse($exception, Response::HTTP_UNAUTHORIZED);
         }
 

@@ -2,15 +2,14 @@
 
 namespace SuStartX\JWTRedisMultiAuth\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\ServiceProvider;
 use SuStartX\JWTRedisMultiAuth\Cache\RedisCache;
 use SuStartX\JWTRedisMultiAuth\Contracts\DataFactoryContract;
 use SuStartX\JWTRedisMultiAuth\Contracts\RedisCacheContract;
 use SuStartX\JWTRedisMultiAuth\Factories\BaseUserDataFactory;
 use SuStartX\JWTRedisMultiAuth\Guards\JWTRedisMultiAuthGuard;
 use SuStartX\JWTRedisMultiAuth\Hashers\JWTRedisMultiAuthHasher;
-use SuStartX\JWTRedisMultiAuth\Helpers\GuardHelper;
 
 class JWTRedisMultiAuthServiceProvider extends ServiceProvider
 {
@@ -33,37 +32,39 @@ class JWTRedisMultiAuthServiceProvider extends ServiceProvider
     {
         // Provider
         Auth::provider('JWTRedisMultiAuthProvider', function ($app, array $config) {
-            $guard_name = GuardHelper::autoDetectGuard();
+            // TODO : Otomatik tespit etme tamamlanabilir..
+            // $guard_name = GuardHelper::autoDetectGuard();
+            $guard_name = config('auth.defaults.guard');
             $guard = config('auth.guards.' . $guard_name);
-            $config = config('auth.providers.'. $guard['provider']);
+            $config = config('auth.providers.' . $guard['provider']);
 
             $module_config = config('jwt_redis_multi_auth');
 
             // Önce $config ile gelen verileri kontrol et..
-            if(array_key_exists('hasher', $config)){
+            if (array_key_exists('hasher', $config)) {
                 // doğrudan geldi, önce değerlendir
-                if($config['hasher'] === 'default' || $config['hasher'] === 'bcrypt'){
+                if ($config['hasher'] === 'default' || $config['hasher'] === 'bcrypt') {
                     $hasher = $app['hash'];
-                }else if ($config['hasher'] === 'jwt_redis_multi_auth'){
+                } elseif ($config['hasher'] === 'jwt_redis_multi_auth') {
                     $hasher = new JWTRedisMultiAuthHasher();
-                }else{
+                } else {
                     $hasher = new $config['hasher'];
                 }
-            }else{
+            } else {
                 // $config ile hash bilgisi gelmediyse varsayılan modül ayarlarına bak..
-                if($module_config['hasher'] === 'default' || $module_config['hasher'] === 'bcrypt'){
+                if ($module_config['hasher'] === 'default' || $module_config['hasher'] === 'bcrypt') {
                     $hasher = $app['hash'];
-                }else if($module_config['hasher'] === 'jwt_redis_multi_auth'){
+                } elseif ($module_config['hasher'] === 'jwt_redis_multi_auth') {
                     $hasher = new JWTRedisMultiAuthHasher();
-                }else{
+                } else {
                     $hasher = new $module_config['hasher'];
                 }
             }
 
             // Data factory hazırlanıyor
-            if(array_key_exists('data_factory', $config)){
+            if (array_key_exists('data_factory', $config)) {
                 $data_factory = app($config['data_factory']);
-            }else{
+            } else {
                 $data_factory = new BaseUserDataFactory();
             }
 
@@ -76,7 +77,9 @@ class JWTRedisMultiAuthServiceProvider extends ServiceProvider
 
         // Guard
         Auth::extend('JWTRedisMultiAuthGuard', function ($app, $name, array $config) {
-            $guard_name = GuardHelper::autoDetectGuard();
+            // TODO : Otomatik tespit etme tamamlanabilir..
+            // $guard_name = GuardHelper::autoDetectGuard();
+            $guard_name = config('auth.defaults.guard');
             $config = config('auth.guards.' . $guard_name);
 
             $jwt = $app['tymon.jwt'];
@@ -94,22 +97,22 @@ class JWTRedisMultiAuthServiceProvider extends ServiceProvider
         });
 
         // Hasher
-        $this->app->bind('JWTRedisMultiAuthHasher',function(){
+        $this->app->bind('JWTRedisMultiAuthHasher', function () {
             $config = config('hashing.bcrypt');
             return new JWTRedisMultiAuthHasher($config);
         });
 
         // Config
-        $this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'jwt_redis_multi_auth');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'jwt_redis_multi_auth');
         $this->publishes([
-            __DIR__.'/../../config/config.php' => config_path('jwt_redis_multi_auth.php')
+            __DIR__ . '/../../config/config.php' => config_path('jwt_redis_multi_auth.php')
         ], 'config');
 
         // Model Observer
         $providers = config('auth.providers');
         $prefix = config('jwt_redis_multi_auth.guard_prefix');
         foreach ($providers as $provider => $config) {
-            if(str_starts_with($provider, $prefix)){
+            if (str_starts_with($provider, $prefix)) {
                 $model = $config['model'];
                 if (class_exists($model)) {
                     $model::observe(config('jwt_redis_multi_auth.observer'));

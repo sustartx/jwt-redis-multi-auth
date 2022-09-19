@@ -1,11 +1,15 @@
 <?php
+
 namespace SuStartX\JWTRedisMultiAuth\Helpers;
 
+use Cookie;
+use Exception;
 use PHPOpenSourceSaver\JWTAuth\Token;
 
 class GuardHelper
 {
-    public static function autoDetectGuard(){
+    public static function autoDetectGuard()
+    {
         $request = request();
 
         $prefix = config('jwt_redis_multi_auth.guard_prefix');
@@ -26,44 +30,44 @@ class GuardHelper
         // ----------------------------------------------------------------------------------------------------
 
         // Giriş yapmak istiyorsa..
-        if(
+        if (
             $request->route() &&
             (
                 config('jwt_redis_multi_auth.login_route_name') === $request->route()->getName() ||
                 config('jwt_redis_multi_auth.login_2fa_code_route_name') === $request->route()->getName()
             )
-        ){
-            if (!is_null($request_guard_name)){
+        ) {
+            if (!is_null($request_guard_name)) {
                 $guard_name = $request_guard_name;
-            }else{
+            } else {
                 $guard_name = $default_guard_name;
             }
-        }else{
-            $token_cookie = \Cookie::get(env('COOKIE_NAME'));
+        } else {
+            $token_cookie = Cookie::get(env('COOKIE_NAME'));
             $token_bearer = request()->bearerToken();
             $token = $token_cookie ?: $token_bearer ?: null;
 
-            if ($token){
+            if ($token) {
                 try {
                     $decoded_token = app()->get('tymon.jwt.manager')->decode(new Token($token));
                     $guard = $decoded_token->get(config('jwt_redis_multi_auth.jwt_guard_key'));
                     // Oturum varsa oturumdan hangi guard ile çalıştığı tespit edildi
                     $guard_name = $prefix . $guard;
-                }catch (\Exception $exception){
+                } catch (Exception $exception) {
                     $guard_name = $default_guard_name;
                 }
-            }else{
-                if (!is_null($request_guard_name)){
+            } else {
+                if (!is_null($request_guard_name)) {
                     $guard_name = $request_guard_name;
-                }else{
+                } else {
                     $guard_name = $default_guard_name;
                 }
             }
         }
 
-        // Olmayan guard ismiyle istekte bulunulduğunda hata vermemesi için varsaılan guard ile işlem yapılıyor.
+        // Olmayan guard ismiyle istekte bulunulduğunda hata vermemesi için varsayılan guard ile işlem yapılıyor.
         $all_guard = config('auth.guards');
-        if(!array_key_exists($guard_name, $all_guard)){
+        if (!array_key_exists($guard_name, $all_guard)) {
             $guard_name = $default_guard_name;
         }
 
